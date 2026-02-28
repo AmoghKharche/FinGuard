@@ -1,0 +1,60 @@
+<div class="container-fluid">
+
+    <h4 class="mb-4">Rule Configuration</h4>
+  
+    <div *ngIf="loading" class="text-center py-4">
+      Loading rules...
+    </div>
+  
+    <div *ngIf="!loading">
+  
+      <div class="row g-4">
+  
+        <div class="col-md-6" *ngFor="let rule of rules">
+          <div class="card shadow-sm p-3">
+  
+            <h6 class="mb-3 text-danger">{{ rule.rule_type }}</h6>
+  
+            <div class="mb-3">
+              <label class="form-label">Threshold</label>
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="rule.threshold"
+              />
+            </div>
+  
+            <div class="mb-3">
+              <label class="form-label">Severity</label>
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="rule.severity"
+              />
+            </div>
+  
+            <div class="mb-3">
+              <label class="form-label">Window (seconds)</label>
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="rule.window_seconds"
+              />
+            </div>
+  
+            <button
+              class="btn btn-primary w-100"
+              [disabled]="savingRule === rule.rule_type"
+              (click)="saveRule(rule)"
+            >
+              {{ savingRule === rule.rule_type ? 'Saving...' : 'Save Changes' }}
+            </button>
+  
+          </div>
+        </div>
+  
+      </div>
+  
+    </div>
+  
+  </div>

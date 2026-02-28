@@ -1,0 +1,107 @@
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Fraud Alerts</h4>
+    </div>
+  
+    <!-- Filters -->
+    <div class="card p-3 mb-3 shadow-sm">
+      <div class="row g-3">
+  
+        <div class="col-md-4">
+          <label class="form-label">Rule Type</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="ruleFilter"
+            placeholder="VELOCITY_V1"
+          />
+        </div>
+  
+        <div class="col-md-4">
+          <label class="form-label">Card Hash</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="cardFilter"
+            placeholder="card123"
+          />
+        </div>
+  
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary w-100" (click)="applyFilters()">
+            Apply Filters
+          </button>
+        </div>
+  
+      </div>
+    </div>
+  
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-4">
+      Loading...
+    </div>
+  
+    <!-- Table -->
+    <div *ngIf="!loading" class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Rule Type</th>
+              <th>Card Hash</th>
+              <th>Txn Count</th>
+              <th>Window</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let alert of alerts">
+              <td>
+                <span class="badge bg-danger">
+                  {{ alert.rule_type }}
+                </span>
+              </td>
+              <td>{{ alert.card_hash }}</td>
+              <td>{{ alert.transaction_count }}</td>
+              <td>{{ alert.window_bucket }}</td>
+              <td>{{ alert.last_updated | date:'short' }}</td>
+            </tr>
+  
+            <tr *ngIf="alerts.length === 0">
+              <td colspan="5" class="text-center py-3">
+                No alerts found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center p-3">
+        <div>
+          Showing {{ alerts.length }} of {{ total }}
+        </div>
+  
+        <div>
+          <button
+            class="btn btn-sm btn-outline-secondary me-2"
+            [disabled]="page === 1"
+            (click)="changePage(page - 1)">
+            Prev
+          </button>
+  
+          <span>Page {{ page }}</span>
+  
+          <button
+            class="btn btn-sm btn-outline-secondary ms-2"
+            [disabled]="alerts.length < limit"
+            (click)="changePage(page + 1)">
+            Next
+          </button>
+        </div>
+      </div>
+  
+    </div>
+  
+  </div>

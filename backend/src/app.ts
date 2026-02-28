@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import cors from '@fastify/cors';
 declare module "fastify" {
   interface FastifyInstance {
     ruleConfig: Record<string, any>;
@@ -18,8 +19,6 @@ import dlqRoute from "./routes/dlq";
 import metricsRoute from "./routes/metrics";
 
 
-
-
 export async function buildApp() {
   const app = Fastify({
     logger: {
@@ -32,6 +31,10 @@ export async function buildApp() {
       },
     },
     disableRequestLogging: true,
+  });
+  await app.register(cors, {
+    origin: 'http://localhost:4200', // Angular dev server
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
   });
 
   await app.register(redisPlugin);

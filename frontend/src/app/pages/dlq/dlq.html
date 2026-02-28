@@ -1,0 +1,63 @@
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Dead Letter Queue (DLQ)</h4>
+      <button class="btn btn-sm btn-outline-primary" (click)="loadDLQ()">
+        Refresh
+      </button>
+    </div>
+  
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-4">
+      Loading DLQ...
+    </div>
+  
+    <!-- Table -->
+    <div *ngIf="!loading" class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Transaction ID</th>
+              <th>Error</th>
+              <th>Retries</th>
+              <th>Failed At</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+  
+            <tr *ngFor="let item of dlqItems">
+              <td>{{ item.originalEvent?.transactionId }}</td>
+              <td class="text-danger">{{ item.errorMessage }}</td>
+              <td>{{ item.retryCount }}</td>
+              <td>{{ item.failedAt | date:'short' }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-secondary"
+                        (click)="toggleExpand(item)">
+                  {{ item.expanded ? 'Hide' : 'View' }}
+                </button>
+              </td>
+            </tr>
+  
+            <!-- Expanded Row -->
+            <tr *ngFor="let item of dlqItems">
+              <td colspan="5" *ngIf="item.expanded">
+                <pre class="bg-light p-3 rounded">
+  {{ item.originalEvent | json }}
+                </pre>
+              </td>
+            </tr>
+  
+            <tr *ngIf="dlqItems.length === 0">
+              <td colspan="5" class="text-center py-3">
+                No DLQ entries
+              </td>
+            </tr>
+  
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+  </div>

@@ -1,0 +1,81 @@
+<div class="container-fluid">
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+          <h6>Total Processed</h6>
+          <h3>{{ metrics?.transactionsProcessed }}</h3>
+        </div>
+      </div>
+  
+      <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+          <h6>Approved</h6>
+          <h3 class="text-success">{{ metrics?.transactionsApproved }}</h3>
+        </div>
+      </div>
+  
+      <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+          <h6>Review</h6>
+          <h3 class="text-warning">{{ metrics?.transactionsReview }}</h3>
+        </div>
+      </div>
+  
+      <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+          <h6>Declined</h6>
+          <h3 class="text-danger">{{ metrics?.transactionsDeclined }}</h3>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Charts -->
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h6>Decision Distribution</h6>
+          <canvas baseChart
+                  [data]="pieChartData"
+                  [type]="pieChartType">
+          </canvas>
+        </div>
+      </div>
+  
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h6>Fraud Alerts by Rule</h6>
+          <canvas baseChart
+                  [data]="barChartData"
+                  [type]="barChartType">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Reliability Indicators -->
+    <div class="row g-3 mt-4">
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6>Retries</h6>
+          <h4>{{ metrics?.retryTotal }}</h4>
+        </div>
+      </div>
+  
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6>DLQ</h6>
+          <h4>{{ metrics?.dlqTotal }}</h4>
+        </div>
+      </div>
+  
+      <div class="col-md-4">
+        <div class="card p-3 shadow-sm">
+          <h6>Worker Errors</h6>
+          <h4>{{ metrics?.workerErrors }}</h4>
+        </div>
+      </div>
+    </div>
+  
+  </div>
