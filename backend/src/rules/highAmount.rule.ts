@@ -1,7 +1,6 @@
 import { FraudRule } from "./types";
 import { randomUUID } from "crypto";
-
-const HIGH_AMOUNT_THRESHOLD = 500000;
+import { metrics } from "../utils/metrics";
 
 export const highAmountRule: FraudRule = {
   ruleType: "HIGH_AMOUNT_V1",
@@ -38,6 +37,7 @@ if (event.amount > threshold) {
         { cardHash: event.cardHash, amount: event.amount },
         "🚨 High amount fraud alert"
       );
+      metrics.incrementFraud("HIGH_AMOUNT_V1");
       return {
         ruleType: "HIGH_AMOUNT_V1",
         triggered: true,

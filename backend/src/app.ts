@@ -11,6 +11,14 @@ import redisPlugin from "./plugins/redis";
 import postgresPlugin from "./plugins/postgres";
 import healthRoute from "./routes/health";
 import eventsRoute from "./routes/events";
+import transactionsRoute from "./routes/transactions";
+import fraudAlertsRoute from "./routes/fraudAlerts";
+import ruleConfigRoute from "./routes/ruleConfig";
+import dlqRoute from "./routes/dlq";
+import metricsRoute from "./routes/metrics";
+
+
+
 
 export async function buildApp() {
   const app = Fastify({
@@ -31,9 +39,13 @@ export async function buildApp() {
 
   await app.register(healthRoute);
   await app.register(eventsRoute);
-  await loadRuleConfig(app);
-
+  await app.register(transactionsRoute);
+  await app.register(fraudAlertsRoute);
+  await app.register(ruleConfigRoute);
+  await app.register(dlqRoute);
+  await app.register(metricsRoute);
   
+  await loadRuleConfig(app);
   await setupRuleListener(app);
   
 

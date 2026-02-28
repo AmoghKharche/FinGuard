@@ -1,5 +1,7 @@
 import { FraudRule } from "./types";
 import { randomUUID } from "crypto";
+import { metrics } from "../utils/metrics";
+
 
 export const velocityRule: FraudRule = {
   ruleType: "VELOCITY_V1",
@@ -18,13 +20,13 @@ export const velocityRule: FraudRule = {
       await app.redis.expire(cardKey, windowSeconds);
     }
 
-    if (count > limit) {
-      app.log.info(
-        { cardHash: event.cardHash, count },
-        "📊 Velocity counter updated"
-      );
+      
 
       if (count > limit) {
+        app.log.info(
+          { cardHash: event.cardHash, count },
+          "📊 Velocity counter updated"
+        );
         const windowBucket = Math.floor(Date.now() / 60000);
         const alertId = randomUUID();
 
@@ -45,17 +47,17 @@ export const velocityRule: FraudRule = {
           { cardHash: event.cardHash },
           "🚨 Velocity fraud alert aggregated"
         );
+        metrics.incrementFraud("VELOCITY_V1");
         return {
           ruleType: "VELOCITY_V1",
           triggered: true,
           severity: severity,
-        };
-      }
-      return {
-        ruleType: "VELOCITY_V1",
-        triggered: false,
-        severity: 0,
-      };
+        };      
     }
+    return {
+      ruleType: "VELOCITY_V1",
+      triggered: false,
+      severity: 0,
+    };
   },
 };

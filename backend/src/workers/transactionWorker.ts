@@ -1,7 +1,10 @@
 import { STREAMS, CONSUMER_GROUPS } from "../utils/constants";
 import { FastifyInstance } from "fastify";
 import { fraudRules } from "../rules";
+import { metrics } from "../utils/metrics";
 
+const MAX_RETRIES = 5;
+const DLQ_STREAM = "transactions_dlq";
 
 export async function startTransactionWorker(app: FastifyInstance) {
   const stream = STREAMS.TRANSACTIONS;
@@ -9,13 +12,7 @@ export async function startTransactionWorker(app: FastifyInstance) {
   const consumerName = "worker-1";
 
   try {
-    await app.redis.xgroup(
-      "CREATE",
-      stream,
-      group,
-      "0",
-      "MKSTREAM"
-    );
+    await app.redis.xgroup("CREATE", stream, group, "0", "MKSTREAM");
     app.log.info("Consumer group created");
   } catch (err: any) {
     if (!err.message.includes("BUSYGROUP")) {
@@ -45,13 +42,13 @@ export async function startTransactionWorker(app: FastifyInstance) {
       for (const [streamName, messages] of response) {
         for (const [id, fields] of messages) {
           const event = parseFields(fields);
-
           await processEvent(app, stream, group, id, event);
         }
       }
     } catch (err) {
-      app.log.error("Worker error", err);
-    }
+        metrics.incrementWorkerError();
+        app.log.error("Worker error", err);
+      }    
   }
 }
 async function recoverPendingMessages(
@@ -100,133 +97,109 @@ function parseFields(fields: string[]) {
   return obj;
 }
 async function processEvent(
-    app: FastifyInstance,
-    stream: string,
-    group: string,
-    id: string,
-    event: any
-  ) {
-    const client = await app.pg.connect();
-    const transactionId = event.transactionId;
-  
-    try {
-      await client.query("BEGIN");
-  
-      // 1️⃣ Idempotency check
-      await client.query(
-        "INSERT INTO processed_transactions (transaction_id) VALUES ($1)",
-        [transactionId]
-      );
-  
-      // 2️⃣ Apply rules
-      let riskScore = 0;
+  app: FastifyInstance,
+  stream: string,
+  group: string,
+  id: string,
+  event: any
+) {
+  const client = await app.pg.connect();
+  const transactionId = event.transactionId;
 
-        for (const rule of fraudRules) {
-        const result = await rule.evaluate(app, client, event);
+  try {
+    await client.query("BEGIN");
+    // 1️⃣ Idempotency check
+    await client.query(
+      "INSERT INTO processed_transactions (transaction_id) VALUES ($1)",
+      [transactionId]
+    );
 
-        if (result.triggered) {
-            riskScore += result.severity;
-        }
-        }
-        let decision = "APPROVED";
+    // 2️⃣ Apply rules
+    let riskScore = 0;
 
-        if (riskScore >= 5) {
-        decision = "DECLINED";
-        } else if (riskScore >= 2) {
-        decision = "REVIEW";
-        }
-        
-        app.log.info(
-            { decision },
-        
-          );        
-          await client.query(
-            `
+    for (const rule of fraudRules) {
+      const result = await rule.evaluate(app, client, event);
+
+      if (result.triggered) {
+        riskScore += result.severity;
+      }
+    }
+    let decision = "APPROVED";
+
+    if (riskScore >= 5) {
+      decision = "DECLINED";
+    } else if (riskScore >= 2) {
+      decision = "REVIEW";
+    }
+    app.log.info({ decision });
+    await client.query(
+      `
             INSERT INTO transaction_decisions
             (transaction_id, risk_score, decision)
             VALUES ($1, $2, $3)
             `,
-            [event.transactionId, riskScore, decision]
-          );
+      [event.transactionId, riskScore, decision]
+    );
 
-      await client.query("COMMIT");
-  
-      app.log.info(
-        { transactionId },
-        "✅ Transaction fully processed"
-      );
-  
+    await client.query("COMMIT");
+    metrics.incrementTransaction(decision);
+
+    app.log.info({ transactionId }, "✅ Transaction fully processed");
+
+    await app.redis.xack(stream, group, id);
+  } catch (err: any) {
+    await client.query("ROLLBACK");
+
+    if (err.code === "23505") {
+      app.log.warn({ transactionId }, "⚠️ Duplicate transaction skipped");
+
       await app.redis.xack(stream, group, id);
-  
-    } catch (err: any) {
-      await client.query("ROLLBACK");
-  
-      if (err.code === "23505") {
-        app.log.warn(
-          { transactionId },
-          "⚠️ Duplicate transaction skipped"
-        );
-  
-        await app.redis.xack(stream, group, id);
-        return;
-      }
-  
-      app.log.error(err, "❌ Processing failed — will retry");
-      // Do NOT ACK → retry later
-    } finally {
-      client.release();
+      return;
     }
+
+    const retryKey = `retry:${id}`;
+    const retryCount = await app.redis.incr(retryKey);
+    metrics.incrementRetry();
+    // Safety TTL to avoid memory leak
+    await app.redis.expire(retryKey, 3600);
+
+    app.log.error(
+      {
+        transactionId,
+        retryCount,
+        message: err.message,
+        stack: err.stack,
+        code: err.code
+      },
+      "❌ Processing failed"
+    );
+    if (retryCount > MAX_RETRIES) {
+      app.log.error(
+        { transactionId, retryCount },
+        "🚨 Max retries exceeded — moving to DLQ"
+      );
+
+      await app.redis.xadd(
+        DLQ_STREAM,
+        "*",
+        "payload",
+        JSON.stringify({
+          originalEvent: event,
+          errorMessage: err.message,
+          retryCount,
+          failedAt: new Date().toISOString(),
+        })
+      );
+
+      metrics.incrementDLQ();
+
+      await app.redis.xack(stream, group, id);
+      await app.redis.del(retryKey);
+    } else {
+      app.log.warn({ transactionId, retryCount }, "Retrying message later");
+      // Do NOT ACK → will be reclaimed
+    }
+  } finally {
+    client.release();
   }
-
-
-//   async function applyVelocityRule(
-//     app: FastifyInstance,
-//     client: any,
-//     event: any
-//   ): Promise<boolean> {
-//     const cardKey = `velocity:${event.cardHash}`;
-  
-//     const count = await app.redis.incr(cardKey);
-  
-//     if (count === 1) {
-//       await app.redis.expire(cardKey, VELOCITY_RULE.WINDOW_SECONDS);
-//     }
-  
-//     app.log.info(
-//       { cardHash: event.cardHash, count },
-//       "📊 Velocity counter updated"
-//     );
-  
-//     if (count > VELOCITY_RULE.LIMIT) {
-
-//         const windowBucket = Math.floor(Date.now() / 60000);
-//         const alertId = randomUUID();
-      
-//         await client.query(
-//           `
-//           INSERT INTO fraud_alerts
-//           (id, card_hash, rule_type, window_bucket, transaction_count)
-//           VALUES ($1, $2, $3, $4, 1)
-//           ON CONFLICT (card_hash, rule_type, window_bucket)
-//           DO UPDATE
-//           SET transaction_count = fraud_alerts.transaction_count + 1,
-//               last_updated = NOW()
-//           `,
-//           [
-//             alertId,
-//             event.cardHash,
-//             "VELOCITY_V1",
-//             windowBucket
-//           ]
-//         );
-      
-//         app.log.warn(
-//           { cardHash: event.cardHash, windowBucket },
-//           "🚨 Velocity fraud alert aggregated"
-//         );
-      
-//         return true;
-//       }
-  
-//     return false;
-//   }
+}

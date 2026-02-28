@@ -1,11 +1,17 @@
 import { FraudRule } from "./types";
 import { randomUUID } from "crypto";
+import { metrics } from "../utils/metrics";
+
 
 export const rapidFailureRule: FraudRule = {
   ruleType: "RAPID_FAILURE_V1",
 
   async evaluate(app, client, event) {
-    if (event.status !== "FAILED") return;
+    if (event.status !== "FAILED") return {
+      ruleType: "RAPID_FAILURE_V1",
+      triggered: false,
+      severity: 0,
+    };;
 
     const config = app.ruleConfig["RAPID_FAILURE_V1"];
 
@@ -43,6 +49,7 @@ export const rapidFailureRule: FraudRule = {
         { cardHash: event.cardHash },
         "🚨 Rapid failure fraud alert"
       );
+      metrics.incrementFraud("RAPID_FAILURE_V1");
       return {
         ruleType: "RAPID_FAILURE_V1",
         triggered: true,
