@@ -7,6 +7,11 @@ const eventsRoute: FastifyPluginAsync = async (fastify) => {
     const body = request.body as any;
 
     const eventId = randomUUID();
+    // Use client-provided transaction time, or server time if missing
+    const timestamp =
+      body.timestamp != null && body.timestamp !== ""
+        ? Number(body.timestamp)
+        : Date.now();
 
     await fastify.redis.xadd(
       STREAMS.TRANSACTIONS,
@@ -24,7 +29,7 @@ const eventsRoute: FastifyPluginAsync = async (fastify) => {
       "cardHash",
       body.cardHash,
       "timestamp",
-      body.timestamp.toString()
+      String(timestamp)
     );
     fastify.log.debug(
       { eventId, transactionId: body.transactionId },

@@ -12,9 +12,12 @@
   
         <div class="col-md-6" *ngFor="let rule of rules">
           <div class="card shadow-sm p-3">
-  
-            <h6 class="mb-3 text-danger">{{ rule.rule_type }}</h6>
-  
+
+            <h6 class="mb-2 text-danger">{{ rule.rule_type }}</h6>
+            <p *ngIf="ruleDescriptions[rule.rule_type]" class="text-muted small mb-3">
+              {{ ruleDescriptions[rule.rule_type] }}
+            </p>
+
             <div class="mb-3">
               <label class="form-label">Threshold</label>
               <input
@@ -41,6 +44,29 @@
                 [(ngModel)]="rule.window_seconds"
               />
             </div>
+
+            <ng-container *ngIf="rule.rule_type === 'SUSPICIOUS_HOURS_V1'">
+              <div class="mb-3">
+                <label class="form-label">Start hour (IST, 0–23)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  class="form-control"
+                  [(ngModel)]="rule.start_hour"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">End hour (IST, 0–23)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  class="form-control"
+                  [(ngModel)]="rule.end_hour"
+                />
+              </div>
+            </ng-container>
   
             <button
               class="btn btn-primary w-100"

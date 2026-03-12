@@ -37,7 +37,17 @@ export default async function ruleConfigRoute(app: FastifyInstance) {
       values.push(body.window_seconds);
       updates.push(`window_seconds = $${values.length}`);
     }
-  
+
+    if (body.start_hour !== undefined) {
+      values.push(body.start_hour);
+      updates.push(`start_hour = $${values.length}`);
+    }
+
+    if (body.end_hour !== undefined) {
+      values.push(body.end_hour);
+      updates.push(`end_hour = $${values.length}`);
+    }
+
     if (updates.length === 0) {
       return reply.status(400).send({
         message: "No valid fields provided"
