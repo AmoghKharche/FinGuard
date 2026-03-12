@@ -23,10 +23,6 @@ export const velocityRule: FraudRule = {
       
 
       if (count > limit) {
-        app.log.info(
-          { cardHash: event.cardHash, count },
-          "📊 Velocity counter updated"
-        );
         const windowBucket = Math.floor(Date.now() / 60000);
         const alertId = randomUUID();
 
@@ -44,8 +40,8 @@ export const velocityRule: FraudRule = {
         );
 
         app.log.warn(
-          { cardHash: event.cardHash },
-          "🚨 Velocity fraud alert aggregated"
+          { cardHash: event.cardHash, count },
+          "Velocity rule triggered"
         );
         metrics.incrementFraud("VELOCITY_V1");
         return {

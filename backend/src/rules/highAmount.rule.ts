@@ -35,7 +35,7 @@ if (event.amount > threshold) {
 
       app.log.warn(
         { cardHash: event.cardHash, amount: event.amount },
-        "🚨 High amount fraud alert"
+        "High amount rule triggered"
       );
       metrics.incrementFraud("HIGH_AMOUNT_V1");
       return {

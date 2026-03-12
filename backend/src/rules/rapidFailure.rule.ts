@@ -46,8 +46,8 @@ export const rapidFailureRule: FraudRule = {
       );
 
       app.log.warn(
-        { cardHash: event.cardHash },
-        "🚨 Rapid failure fraud alert"
+        { cardHash: event.cardHash, count },
+        "Rapid failure rule triggered"
       );
       metrics.incrementFraud("RAPID_FAILURE_V1");
       return {

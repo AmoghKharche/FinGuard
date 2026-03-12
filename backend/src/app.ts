@@ -17,6 +17,7 @@ import fraudAlertsRoute from "./routes/fraudAlerts";
 import ruleConfigRoute from "./routes/ruleConfig";
 import dlqRoute from "./routes/dlq";
 import metricsRoute from "./routes/metrics";
+import websocket from '@fastify/websocket';
 
 
 export async function buildApp() {
@@ -39,6 +40,7 @@ export async function buildApp() {
 
   await app.register(redisPlugin);
   await app.register(postgresPlugin);
+  await app.register(websocket);
 
   await app.register(healthRoute);
   await app.register(eventsRoute);
@@ -50,8 +52,23 @@ export async function buildApp() {
   
   await loadRuleConfig(app);
   await setupRuleListener(app);
-  
+  const metricClients = new Set<unknown>();
+  app.decorate("metricClients", metricClients);
 
+  app.get('/ws/metrics', { websocket: true }, (socket, req) => {
+    const ws = socket;
+    app.metricClients.add(ws);
+    app.log.info("WebSocket metrics client connected");
+
+    ws.on('close', () => {
+      app.metricClients.delete(ws);
+      app.log.info("WebSocket metrics client disconnected");
+    });
+
+    ws.on('error', (err: unknown) => {
+      app.log.error({ err }, "WebSocket error");
+    });
+  });
   return app;
 }
 
@@ -68,34 +85,31 @@ async function setupRuleListener(app: FastifyInstance) {
         connectionString: process.env.DATABASE_URL,
       });
 
-      app.log.info("Attempting listener connection...");
       await listenerClient.connect();
-      app.log.info("Listener connected successfully");
-            await listenerClient.query("LISTEN rule_config_updated");
-
-      app.log.info("🎧 Listening for rule config updates");
+      await listenerClient.query("LISTEN rule_config_updated");
+      app.log.info("Rule config listener connected");
 
       reconnectDelay = 5000; // reset delay after success
 
       listenerClient.on("notification", async (msg) => {
         if (msg.channel === "rule_config_updated") {
-          app.log.info("🔄 Rule config updated — reloading...");
+          app.log.info("Rule config updated, reloading");
           await loadRuleConfig(app);
         }
       });
 
-      listenerClient.on("error", async (err) => {
-        app.log.error("Listener connection lost. Reconnecting...");
+      listenerClient.on("error", async () => {
+        app.log.error("Rule config listener connection lost, reconnecting");
         await cleanupAndReconnect();
       });
 
       listenerClient.on("end", async () => {
-        app.log.warn("Listener connection ended. Reconnecting...");
+        app.log.warn("Rule config listener ended, reconnecting");
         await cleanupAndReconnect();
       });
 
     } catch (err) {
-      app.log.error("Listener connect failed. Retrying...");
+      app.log.error({ err }, "Rule config listener connect failed, retrying");
       scheduleReconnect();
     }
   };
@@ -133,5 +147,5 @@ async function loadRuleConfig(app: FastifyInstance) {
 
   app.ruleConfig = configMap;
 
-  app.log.info("✅ Rule config loaded into memory");
+  app.log.info("Rule config loaded");
 }

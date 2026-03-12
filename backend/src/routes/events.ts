@@ -26,10 +26,10 @@ const eventsRoute: FastifyPluginAsync = async (fastify) => {
       "timestamp",
       body.timestamp.toString()
     );
-    fastify.log.info(
-        { eventId, transactionId: body.transactionId },
-        "📥 Event accepted"
-      );
+    fastify.log.debug(
+      { eventId, transactionId: body.transactionId },
+      "Event accepted"
+    );
 
     return reply.status(202).send({ accepted: true, eventId });
   });

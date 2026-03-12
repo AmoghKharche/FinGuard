@@ -13,12 +13,12 @@ export async function startTransactionWorker(app: FastifyInstance) {
 
   try {
     await app.redis.xgroup("CREATE", stream, group, "0", "MKSTREAM");
-    app.log.info("Consumer group created");
+    app.log.info("Transaction consumer group created");
   } catch (err: any) {
     if (!err.message.includes("BUSYGROUP")) {
       throw err;
     }
-    app.log.info("Consumer group already exists");
+    app.log.info("Transaction consumer group already exists");
   }
   await recoverPendingMessages(app, stream, group, consumerName);
 
@@ -46,9 +46,9 @@ export async function startTransactionWorker(app: FastifyInstance) {
         }
       }
     } catch (err) {
-        metrics.incrementWorkerError();
-        app.log.error("Worker error", err);
-      }    
+      metrics.incrementWorkerError();
+      app.log.error({ err }, "Worker read error");
+    }    
   }
 }
 async function recoverPendingMessages(
@@ -57,7 +57,7 @@ async function recoverPendingMessages(
   group: string,
   consumerName: string
 ) {
-  app.log.info("🔄 Checking for pending messages...");
+  app.log.debug("Recovering pending messages");
 
   let cursor = "0-0";
 
@@ -87,7 +87,7 @@ async function recoverPendingMessages(
     if (cursor === "0-0") break;
   }
 
-  app.log.info("✅ Pending recovery complete");
+  app.log.info("Pending message recovery complete");
 }
 function parseFields(fields: string[]) {
   const obj: Record<string, string> = {};
@@ -131,7 +131,7 @@ async function processEvent(
     } else if (riskScore >= 2) {
       decision = "REVIEW";
     }
-    app.log.info({ decision });
+    app.log.debug({ transactionId, decision, riskScore }, "Transaction decision");
     await client.query(
       `
             INSERT INTO transaction_decisions
@@ -140,18 +140,28 @@ async function processEvent(
             `,
       [event.transactionId, riskScore, decision]
     );
-
+    
     await client.query("COMMIT");
     metrics.incrementTransaction(decision);
 
-    app.log.info({ transactionId }, "✅ Transaction fully processed");
+    // Broadcast updated metrics to connected dashboard clients
+    const clients = app.metricClients;
+    if (clients && clients.size > 0) {
+      const snapshot = metrics.snapshot();
+      for (const client of clients) {
+        (client as { send: (data: string) => void }).send(JSON.stringify({
+          type: "metrics_update",
+          data: snapshot
+        }));
+      }
+    }
 
     await app.redis.xack(stream, group, id);
   } catch (err: any) {
     await client.query("ROLLBACK");
 
     if (err.code === "23505") {
-      app.log.warn({ transactionId }, "⚠️ Duplicate transaction skipped");
+      app.log.warn({ transactionId }, "Duplicate transaction skipped");
 
       await app.redis.xack(stream, group, id);
       return;
@@ -168,15 +178,14 @@ async function processEvent(
         transactionId,
         retryCount,
         message: err.message,
-        stack: err.stack,
         code: err.code
       },
-      "❌ Processing failed"
+      "Transaction processing failed"
     );
     if (retryCount > MAX_RETRIES) {
       app.log.error(
         { transactionId, retryCount },
-        "🚨 Max retries exceeded — moving to DLQ"
+        "Max retries exceeded, moving to DLQ"
       );
 
       await app.redis.xadd(
@@ -196,7 +205,7 @@ async function processEvent(
       await app.redis.xack(stream, group, id);
       await app.redis.del(retryKey);
     } else {
-      app.log.warn({ transactionId, retryCount }, "Retrying message later");
+      app.log.warn({ transactionId, retryCount }, "Message will be retried");
       // Do NOT ACK → will be reclaimed
     }
   } finally {

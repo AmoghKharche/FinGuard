@@ -6,5 +6,6 @@ declare module "fastify" {
   interface FastifyInstance {
     redis: Redis;
     pg: Pool;
+    metricClients: Set<unknown>;
   }
 }
