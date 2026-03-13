@@ -1,5 +1,4 @@
-<div class="fg-page container-fluid">
-
+<div class="fg-page fg-transactions container-fluid">
   <div class="fg-page-header">
     <div class="fg-page-title">
       <div class="fg-page-title-icon">
@@ -10,89 +9,77 @@
         <div class="fg-page-subtitle">Inspect individual transaction decisions and scores</div>
       </div>
     </div>
-
-    <div>
-      <select
-        class="form-select form-select-sm"
-        style="width: 220px;"
-        (change)="applyFilter($any($event.target).value)">
-        <option value="">All decisions</option>
-        <option value="APPROVED">Approved</option>
-        <option value="REVIEW">Review</option>
-        <option value="DECLINED">Declined</option>
-      </select>
-    </div>
+    <select
+      class="fg-transactions-filter form-select form-select-sm"
+      (change)="applyFilter($any($event.target).value)">
+      <option value="">All decisions</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REVIEW">Review</option>
+      <option value="DECLINED">Declined</option>
+    </select>
   </div>
 
-  <!-- Loading -->
-  @if(loading){
-    <div class="text-center py-4 text-white-50">
-      Loading transactions…
-    </div>
-  }
-  @else{
-
-  <!-- Table -->
-  <div class="card">
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead class="table-light">
-          <tr>
-            <th>Transaction ID</th>
-            <th>Risk Score</th>
-            <th>Decision</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let txn of transactions">
-            <td class="text-sm">{{ txn.transaction_id }}</td>
-            <td class="text-sm">{{ txn.risk_score }}</td>
-            <td>
-              <span
-                class="badge"
-                [ngClass]="{
-                  'bg-success': txn.decision === 'APPROVED',
-                  'bg-warning text-dark': txn.decision === 'REVIEW',
-                  'bg-danger': txn.decision === 'DECLINED'
-                }"
-              >
-                {{ txn.decision }}
-              </span>
-            </td>
-            <td class="text-sm">{{ txn.created_at | date:'short' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="d-flex justify-content-between align-items-center p-3 border-top">
-      <div class="text-xs fg-text-muted">
-        Showing {{ transactions.length }} of {{ total }}
+  @if (loading) {
+    <div class="fg-transactions-loading">Loading transactions…</div>
+  } @else {
+    <div class="fg-transactions-card card">
+      <div class="fg-transactions-table-wrap table-responsive">
+        <table class="table fg-transactions-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Risk Score</th>
+              <th>Decision</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (transactions.length === 0) {
+              <tr>
+                <td colspan="4" class="fg-transactions-empty">No transactions found</td>
+              </tr>
+            }
+            @for (txn of transactions; track txn.transaction_id) {
+              <tr>
+                <td class="fg-transactions-id">{{ txn.transaction_id }}</td>
+                <td>{{ txn.risk_score }}</td>
+                <td>
+                  <span
+                    class="badge fg-transactions-badge"
+                    [ngClass]="{
+                      'fg-badge-approved': txn.decision === 'APPROVED',
+                      'fg-badge-review': txn.decision === 'REVIEW',
+                      'fg-badge-declined': txn.decision === 'DECLINED'
+                    }">
+                    {{ txn.decision }}
+                  </span>
+                </td>
+                <td class="fg-transactions-date">{{ txn.created_at | date:'short' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
-
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary"
-                [disabled]="page === 1"
-                (click)="changePage(page - 1)">
-          <i class="bi bi-chevron-left me-1"></i>
-          Prev
-        </button>
-
-        <span class="text-xs">Page {{ page }}</span>
-
-        <button class="btn btn-sm btn-outline-secondary"
-                [disabled]="transactions.length < limit"
-                (click)="changePage(page + 1)">
-          Next
-          <i class="bi bi-chevron-right ms-1"></i>
-        </button>
+      <div class="fg-transactions-footer">
+        <span class="fg-transactions-count">Showing {{ transactions.length }} of {{ total }}</span>
+        <div class="fg-transactions-pagination">
+          <button
+            type="button"
+            class="btn btn-sm fg-transactions-btn"
+            [disabled]="page === 1"
+            (click)="changePage(page - 1)">
+            <i class="bi bi-chevron-left"></i> Prev
+          </button>
+          <span class="fg-transactions-page-num">Page {{ page }}</span>
+          <button
+            type="button"
+            class="btn btn-sm fg-transactions-btn"
+            [disabled]="transactions.length < limit"
+            (click)="changePage(page + 1)">
+            Next <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
-
-  </div>
-
   }
-
 </div>
