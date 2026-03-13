@@ -1,0 +1,63 @@
+/* Host fills main content so dashboard can use 100% height */
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Dashboard fits in 100vh: flex column, no scroll */
+.fg-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.fg-dashboard .fg-page-header {
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.fg-dashboard-cards {
+  flex-shrink: 0;
+  margin-bottom: 0.5rem !important;
+}
+
+.fg-dashboard-charts {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 0.5rem !important;
+}
+
+.fg-dashboard-charts .card {
+  min-height: 0;
+}
+
+.fg-dashboard-reliability {
+  flex-shrink: 0;
+}
+
+/* Chart containers: fixed height, responsive */
+.fg-chart-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.fg-chart-pie {
+  height: 80px;
+}
+
+.fg-chart-bar {
+  height: 80px;
+}
+
+@media (min-width: 768px) {
+  .fg-chart-pie,
+  .fg-chart-bar {
+    height: 200px;
+  }
+}

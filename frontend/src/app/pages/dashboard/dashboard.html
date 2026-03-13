@@ -1,5 +1,4 @@
-<div class="fg-page container-fluid">
-
+<div class="fg-page fg-dashboard container-fluid">
   <div class="fg-page-header">
     <div class="fg-page-title">
       <div class="fg-page-title-icon">
@@ -13,110 +12,99 @@
   </div>
 
   <!-- Summary Cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+  <div class="row g-2 fg-dashboard-cards">
+    <div class="col-6 col-md-3">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Total Processed</span>
           <i class="bi bi-arrow-repeat text-muted"></i>
         </div>
-        <div class="h4 mb-0">{{ metrics?.transactionsProcessed }}</div>
+        <div class="h4 mb-0 mt-1">{{ metrics?.transactionsProcessed }}</div>
       </div>
     </div>
-
-    <div class="col-md-3">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="col-6 col-md-3">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Approved</span>
           <i class="bi bi-check-circle text-success"></i>
         </div>
-        <div class="h4 mb-0 text-success">{{ metrics?.transactionsApproved }}</div>
+        <div class="h4 mb-0 mt-1 text-success">{{ metrics?.transactionsApproved }}</div>
       </div>
     </div>
-
-    <div class="col-md-3">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="col-6 col-md-3">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Review</span>
           <i class="bi bi-eye text-warning"></i>
         </div>
-        <div class="h4 mb-0 text-warning">{{ metrics?.transactionsReview }}</div>
+        <div class="h4 mb-0 mt-1 text-warning">{{ metrics?.transactionsReview }}</div>
       </div>
     </div>
-
-    <div class="col-md-3">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="col-6 col-md-3">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Declined</span>
           <i class="bi bi-x-octagon text-danger"></i>
         </div>
-        <div class="h4 mb-0 text-danger">{{ metrics?.transactionsDeclined }}</div>
+        <div class="h4 mb-0 mt-1 text-danger">{{ metrics?.transactionsDeclined }}</div>
       </div>
     </div>
   </div>
 
   <!-- Charts -->
-  <div class="row g-4">
+  <div class="row g-2 fg-dashboard-charts">
     <div class="col-md-6">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="card p-2 h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-center mb-1">
           <h6 class="mb-0">Decision Distribution</h6>
           <span class="text-xs fg-text-muted">Last 24h</span>
         </div>
-        <canvas
-          baseChart
-          [data]="pieChartData"
-          [type]="pieChartType">
-        </canvas>
+        <div class="fg-chart-wrap fg-chart-pie">
+          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions"></canvas>
+        </div>
       </div>
     </div>
-
     <div class="col-md-6">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="card p-2 h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-center mb-1">
           <h6 class="mb-0">Fraud Alerts by Rule</h6>
-          <span class="text-xs fg-text-muted">Top noisy rules</span>
+          <span class="text-xs fg-text-muted">Top rules</span>
         </div>
-        <canvas
-          baseChart
-          [data]="barChartData"
-          [type]="barChartType">
-        </canvas>
+        <div class="fg-chart-wrap fg-chart-bar">
+          <canvas baseChart [data]="barChartData" [type]="barChartType" [options]="barChartOptions"></canvas>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Reliability Indicators -->
-  <div class="row g-3 mt-4">
-    <div class="col-md-4">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+  <!-- Reliability -->
+  <div class="row g-2 fg-dashboard-reliability">
+    <div class="col-4">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Retries</span>
           <i class="bi bi-arrow-clockwise text-muted"></i>
         </div>
-        <div class="h5 mb-0">{{ metrics?.retryTotal }}</div>
+        <div class="h5 mb-0 mt-1">{{ metrics?.retryTotal }}</div>
       </div>
     </div>
-
-    <div class="col-md-4">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="col-4">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">DLQ</span>
           <i class="bi bi-inboxes text-muted"></i>
         </div>
-        <div class="h5 mb-0">{{ metrics?.dlqTotal }}</div>
+        <div class="h5 mb-0 mt-1">{{ metrics?.dlqTotal }}</div>
       </div>
     </div>
-
-    <div class="col-md-4">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+    <div class="col-4">
+      <div class="card p-2 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-0">
           <span class="text-xs text-uppercase fg-text-muted">Worker Errors</span>
           <i class="bi bi-bug text-muted"></i>
         </div>
-        <div class="h5 mb-0">{{ metrics?.workerErrors }}</div>
+        <div class="h5 mb-0 mt-1">{{ metrics?.workerErrors }}</div>
       </div>
     </div>
   </div>
-
 </div>
