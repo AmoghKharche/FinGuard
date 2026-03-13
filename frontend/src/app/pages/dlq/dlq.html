@@ -1,63 +1,72 @@
-<div class="container-fluid">
+<div class="fg-page container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4>Dead Letter Queue (DLQ)</h4>
-      <button class="btn btn-sm btn-outline-primary" (click)="loadDLQ()">
-        Refresh
-      </button>
-    </div>
-  
-    <!-- Loading -->
-    <div *ngIf="loading" class="text-center py-4">
-      Loading DLQ...
-    </div>
-  
-    <!-- Table -->
-    <div *ngIf="!loading" class="card shadow-sm">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Transaction ID</th>
-              <th>Error</th>
-              <th>Retries</th>
-              <th>Failed At</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-  
-            <tr *ngFor="let item of dlqItems">
-              <td>{{ item.originalEvent?.transactionId }}</td>
-              <td class="text-danger">{{ item.errorMessage }}</td>
-              <td>{{ item.retryCount }}</td>
-              <td>{{ item.failedAt | date:'short' }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-secondary"
-                        (click)="toggleExpand(item)">
-                  {{ item.expanded ? 'Hide' : 'View' }}
-                </button>
-              </td>
-            </tr>
-  
-            <!-- Expanded Row -->
-            <tr *ngFor="let item of dlqItems">
-              <td colspan="5" *ngIf="item.expanded">
-                <pre class="bg-light p-3 rounded">
-  {{ item.originalEvent | json }}
-                </pre>
-              </td>
-            </tr>
-  
-            <tr *ngIf="dlqItems.length === 0">
-              <td colspan="5" class="text-center py-3">
-                No DLQ entries
-              </td>
-            </tr>
-  
-          </tbody>
-        </table>
+  <div class="fg-page-header">
+    <div class="fg-page-title">
+      <div class="fg-page-title-icon">
+        <i class="bi bi-inboxes"></i>
+      </div>
+      <div>
+        <div class="fg-page-title-text">Dead Letter Queue (DLQ)</div>
+        <div class="fg-page-subtitle">Inspect failures that could not be processed successfully</div>
       </div>
     </div>
-  
+    <button class="btn btn-sm btn-outline-primary" (click)="loadDLQ()">
+      <i class="bi bi-arrow-clockwise me-1"></i>
+      Refresh
+    </button>
   </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-4 text-white-50">
+    Loading DLQ…
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="card">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Transaction ID</th>
+            <th>Error</th>
+            <th>Retries</th>
+            <th>Failed At</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr *ngFor="let item of dlqItems">
+            <td class="text-sm">{{ item.originalEvent?.transactionId }}</td>
+            <td class="text-sm text-danger">{{ item.errorMessage }}</td>
+            <td class="text-sm">{{ item.retryCount }}</td>
+            <td class="text-sm">{{ item.failedAt | date:'short' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary"
+                      (click)="toggleExpand(item)">
+                {{ item.expanded ? 'Hide' : 'View' }}
+              </button>
+            </td>
+          </tr>
+
+          <!-- Expanded Row -->
+          <tr *ngFor="let item of dlqItems">
+            <td colspan="5" *ngIf="item.expanded">
+              <pre class="bg-light p-3 rounded mb-0 text-sm">
+{{ item.originalEvent | json }}
+              </pre>
+            </td>
+          </tr>
+
+          <tr *ngIf="dlqItems.length === 0">
+            <td colspan="5" class="text-center py-3 text-sm fg-text-muted">
+              No DLQ entries
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

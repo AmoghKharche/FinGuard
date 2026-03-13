@@ -1,1 +1,159 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global design tokens */
+:root {
+  --fg-bg-body: #0f172a;
+  --fg-bg-surface: #ffffff;
+  --fg-bg-subtle: #f3f4f6;
+  --fg-border-subtle: #e5e7eb;
+  --fg-border-strong: #111827;
+
+  --fg-primary: #4f46e5;
+  --fg-primary-soft: #eef2ff;
+
+  --fg-success: #16a34a;
+  --fg-warning: #d97706;
+  --fg-danger: #dc2626;
+
+  --fg-text-main: #0f172a;
+  --fg-text-muted: #6b7280;
+
+  --fg-radius-lg: 18px;
+  --fg-radius-md: 12px;
+  --fg-radius-sm: 8px;
+
+  --fg-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.18);
+  --fg-shadow-subtle: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--fg-text-main);
+  background: radial-gradient(circle at top left, #111827 0, #020617 42%, #020617 100%);
+}
+
+/* Typographic utility scales */
+.fg-text-12,
+.text-xs {
+  font-size: 12px;
+}
+
+.fg-text-14,
+.text-sm {
+  font-size: 14px;
+}
+
+.fg-text-16,
+.text-md {
+  font-size: 16px;
+}
+
+.fg-text-muted {
+  color: var(--fg-text-muted) !important;
+}
+
+/* Global card treatment */
+.card {
+  border-radius: var(--fg-radius-md);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--fg-shadow-subtle);
+  background-color: var(--fg-bg-surface);
+}
+
+.card h4,
+.card h5,
+.card h6 {
+  font-weight: 600;
+}
+
+/* Tables */
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  border-bottom-width: 0;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-text-muted);
+}
+
+.table tbody td {
+  vertical-align: middle;
+}
+
+/* Chips & badges */
+.badge {
+  border-radius: 999px;
+  padding-inline: 0.65rem;
+  padding-block: 0.25rem;
+  font-weight: 500;
+}
+
+/* Page wrapper */
+.fg-page {
+  padding: 1.25rem 1.5rem 1.75rem;
+}
+
+.fg-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  color: #f9fafb;
+}
+
+.fg-page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fg-page-title-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 20% 0, #4f46e5 0, #1d4ed8 40%, #020617 100%);
+  color: #e5e7eb;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.75);
+}
+
+.fg-page-title-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+.fg-page-subtitle {
+  font-size: 12px;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

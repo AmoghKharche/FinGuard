@@ -1,86 +1,117 @@
-<div class="container-fluid">
+<div class="fg-page container-fluid">
 
-    <h4 class="mb-4">Rule Configuration</h4>
-  
-    <div *ngIf="loading" class="text-center py-4">
-      Loading rules...
+  <div class="fg-page-header">
+    <div class="fg-page-title">
+      <div class="fg-page-title-icon">
+        <i class="bi bi-sliders2-vertical"></i>
+      </div>
+      <div>
+        <div class="fg-page-title-text">Rule Configuration</div>
+        <div class="fg-page-subtitle">Tune thresholds and windows for each risk control</div>
+      </div>
     </div>
-  
-    <div *ngIf="!loading">
-  
-      <div class="row g-4">
-  
-        <div class="col-md-6" *ngFor="let rule of rules">
-          <div class="card shadow-sm p-3">
+  </div>
 
-            <h6 class="mb-2 text-danger">{{ rule.rule_type }}</h6>
-            <p *ngIf="ruleDescriptions[rule.rule_type]" class="text-muted small mb-3">
-              {{ ruleDescriptions[rule.rule_type] }}
-            </p>
+  <div *ngIf="loading" class="text-center py-4 text-white-50">
+    Loading rules…
+  </div>
 
-            <div class="mb-3">
-              <label class="form-label">Threshold</label>
+  <div *ngIf="!loading">
+
+    <div class="row g-4">
+
+      <div class="col-md-6" *ngFor="let rule of rules">
+        <div class="card p-3 h-100 d-flex flex-column">
+
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="text-xs text-uppercase fg-text-muted mb-1">Rule</div>
+              <div class="fw-semibold text-danger">{{ rule.rule_type }}</div>
+            </div>
+            <span class="badge bg-danger-subtle text-danger border-0 text-xs">
+              Tunable
+            </span>
+          </div>
+
+          <p *ngIf="ruleDescriptions[rule.rule_type]" class="fg-text-12 fg-text-muted mb-3">
+            {{ ruleDescriptions[rule.rule_type] }}
+          </p>
+
+          <div class="row g-3 mb-2">
+            <div class="col-4">
+              <label class="form-label text-xs text-uppercase fg-text-muted">Threshold</label>
               <input
                 type="number"
-                class="form-control"
+                class="form-control form-control-sm"
                 [(ngModel)]="rule.threshold"
               />
             </div>
-  
-            <div class="mb-3">
-              <label class="form-label">Severity</label>
+
+            <div class="col-4">
+              <label class="form-label text-xs text-uppercase fg-text-muted">Severity</label>
               <input
                 type="number"
-                class="form-control"
+                class="form-control form-control-sm"
                 [(ngModel)]="rule.severity"
               />
             </div>
-  
-            <div class="mb-3">
-              <label class="form-label">Window (seconds)</label>
+
+            <div class="col-4">
+              <label class="form-label text-xs text-uppercase fg-text-muted">Window (s)</label>
               <input
                 type="number"
-                class="form-control"
+                class="form-control form-control-sm"
                 [(ngModel)]="rule.window_seconds"
               />
             </div>
+          </div>
 
-            <ng-container *ngIf="rule.rule_type === 'SUSPICIOUS_HOURS_V1'">
-              <div class="mb-3">
-                <label class="form-label">Start hour (IST, 0–23)</label>
+          <ng-container *ngIf="rule.rule_type === 'SUSPICIOUS_HOURS_V1'">
+            <div class="row g-3 mb-2">
+              <div class="col-6">
+                <label class="form-label text-xs text-uppercase fg-text-muted">Start hour (IST)</label>
                 <input
                   type="number"
                   min="0"
                   max="23"
-                  class="form-control"
+                  class="form-control form-control-sm"
                   [(ngModel)]="rule.start_hour"
                 />
               </div>
-              <div class="mb-3">
-                <label class="form-label">End hour (IST, 0–23)</label>
+              <div class="col-6">
+                <label class="form-label text-xs text-uppercase fg-text-muted">End hour (IST)</label>
                 <input
                   type="number"
                   min="0"
                   max="23"
-                  class="form-control"
+                  class="form-control form-control-sm"
                   [(ngModel)]="rule.end_hour"
                 />
               </div>
-            </ng-container>
-  
+            </div>
+          </ng-container>
+
+          <div class="mt-auto pt-2">
             <button
-              class="btn btn-primary w-100"
+              class="btn btn-primary w-100 btn-sm"
               [disabled]="savingRule === rule.rule_type"
               (click)="saveRule(rule)"
             >
-              {{ savingRule === rule.rule_type ? 'Saving...' : 'Save Changes' }}
+              <ng-container *ngIf="savingRule === rule.rule_type; else saveLabel">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Saving…
+              </ng-container>
+              <ng-template #saveLabel>
+                Save Changes
+              </ng-template>
             </button>
-  
           </div>
+
         </div>
-  
       </div>
-  
+
     </div>
-  
+
   </div>
+
+</div>

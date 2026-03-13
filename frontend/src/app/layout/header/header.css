@@ -1,0 +1,65 @@
+.fg-header {
+  height: 72px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.85);
+  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9) 0, #020617 52%, #020617 100%);
+  color: #f9fafb;
+}
+
+.fg-header-kicker {
+  letter-spacing: 0.18em;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.fg-header-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.fg-header-subtitle {
+  color: rgba(156, 163, 175, 0.95);
+}
+
+.fg-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.1);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.5);
+}
+
+.fg-header-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35);
+}
+
+.fg-header-user {
+  padding: 0.25rem 0.4rem 0.25rem 0.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(55, 65, 81, 0.8);
+  background: rgba(15, 23, 42, 0.7);
+  cursor: pointer;
+}
+
+.fg-header-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top left, #4f46e5 0, #020617 72%);
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fg-header-user-name {
+  color: #e5e7eb;
+}
+
+.fg-header-user-role {
+  color: rgba(148, 163, 184, 0.95);
+}

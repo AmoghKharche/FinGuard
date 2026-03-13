@@ -2,14 +2,21 @@ import { FraudRule } from "./types";
 import { randomUUID } from "crypto";
 import { metrics } from "../utils/metrics";
 
-
 export const velocityRule: FraudRule = {
   ruleType: "VELOCITY_V1",
 
   async evaluate(app, client, event) {
-    const cardKey = `velocity:${event.cardHash}`;
     const config = app.ruleConfig["VELOCITY_V1"];
 
+    if (!config) {
+      return {
+        ruleType: "VELOCITY_V1",
+        triggered: false,
+        severity: 0,
+      };
+    }
+
+    const cardKey = `velocity:${event.cardHash}`;
     const limit = config.threshold!;
     const windowSeconds = config.window_seconds!;
     const severity = config.severity;
@@ -20,14 +27,12 @@ export const velocityRule: FraudRule = {
       await app.redis.expire(cardKey, windowSeconds);
     }
 
-      
+    if (count > limit) {
+      const windowBucket = Math.floor(Date.now() / 60000);
+      const alertId = randomUUID();
 
-      if (count > limit) {
-        const windowBucket = Math.floor(Date.now() / 60000);
-        const alertId = randomUUID();
-
-        await client.query(
-          `
+      await client.query(
+        `
         INSERT INTO fraud_alerts
         (id, card_hash, rule_type, window_bucket, transaction_count)
         VALUES ($1, $2, $3, $4, 1)
@@ -36,20 +41,22 @@ export const velocityRule: FraudRule = {
         SET transaction_count = fraud_alerts.transaction_count + 1,
             last_updated = NOW()
         `,
-          [alertId, event.cardHash, "VELOCITY_V1", windowBucket]
-        );
+        [alertId, event.cardHash, "VELOCITY_V1", windowBucket]
+      );
 
-        app.log.warn(
-          { cardHash: event.cardHash, count },
-          "Velocity rule triggered"
-        );
-        metrics.incrementFraud("VELOCITY_V1");
-        return {
-          ruleType: "VELOCITY_V1",
-          triggered: true,
-          severity: severity,
-        };      
+      app.log.warn(
+        { cardHash: event.cardHash, count },
+        "Velocity rule triggered"
+      );
+      metrics.incrementFraud("VELOCITY_V1");
+
+      return {
+        ruleType: "VELOCITY_V1",
+        triggered: true,
+        severity,
+      };
     }
+
     return {
       ruleType: "VELOCITY_V1",
       triggered: false,

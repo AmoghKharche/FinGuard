@@ -1,107 +1,118 @@
-<div class="container-fluid">
+<div class="fg-page container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4>Fraud Alerts</h4>
-    </div>
-  
-    <!-- Filters -->
-    <div class="card p-3 mb-3 shadow-sm">
-      <div class="row g-3">
-  
-        <div class="col-md-4">
-          <label class="form-label">Rule Type</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="ruleFilter"
-            placeholder="VELOCITY_V1"
-          />
-        </div>
-  
-        <div class="col-md-4">
-          <label class="form-label">Card Hash</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="cardFilter"
-            placeholder="card123"
-          />
-        </div>
-  
-        <div class="col-md-4 d-flex align-items-end">
-          <button class="btn btn-primary w-100" (click)="applyFilters()">
-            Apply Filters
-          </button>
-        </div>
-  
+  <div class="fg-page-header">
+    <div class="fg-page-title">
+      <div class="fg-page-title-icon">
+        <i class="bi bi-exclamation-octagon"></i>
+      </div>
+      <div>
+        <div class="fg-page-title-text">Fraud Alerts</div>
+        <div class="fg-page-subtitle">Investigate active fraud signals by rule and card</div>
       </div>
     </div>
-  
-    <!-- Loading -->
-    <div *ngIf="loading" class="text-center py-4">
-      Loading...
-    </div>
-  
-    <!-- Table -->
-    <div *ngIf="!loading" class="card shadow-sm">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Rule Type</th>
-              <th>Card Hash</th>
-              <th>Txn Count</th>
-              <th>Window</th>
-              <th>Last Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let alert of alerts">
-              <td>
-                <span class="badge bg-danger">
-                  {{ alert.rule_type }}
-                </span>
-              </td>
-              <td>{{ alert.card_hash }}</td>
-              <td>{{ alert.transaction_count }}</td>
-              <td>{{ alert.window_bucket }}</td>
-              <td>{{ alert.last_updated | date:'short' }}</td>
-            </tr>
-  
-            <tr *ngIf="alerts.length === 0">
-              <td colspan="5" class="text-center py-3">
-                No alerts found
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-  
-      <!-- Pagination -->
-      <div class="d-flex justify-content-between align-items-center p-3">
-        <div>
-          Showing {{ alerts.length }} of {{ total }}
-        </div>
-  
-        <div>
-          <button
-            class="btn btn-sm btn-outline-secondary me-2"
-            [disabled]="page === 1"
-            (click)="changePage(page - 1)">
-            Prev
-          </button>
-  
-          <span>Page {{ page }}</span>
-  
-          <button
-            class="btn btn-sm btn-outline-secondary ms-2"
-            [disabled]="alerts.length < limit"
-            (click)="changePage(page + 1)">
-            Next
-          </button>
-        </div>
-      </div>
-  
-    </div>
-  
   </div>
+
+  <!-- Filters -->
+  <div class="card p-3 mb-3">
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label text-xs text-uppercase fg-text-muted">Rule Type</label>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          [(ngModel)]="ruleFilter"
+          placeholder="VELOCITY_V1"
+        />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label text-xs text-uppercase fg-text-muted">Card Hash</label>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          [(ngModel)]="cardFilter"
+          placeholder="card123"
+        />
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100 btn-sm" (click)="applyFilters()">
+          <i class="bi bi-funnel me-1"></i>
+          Apply Filters
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-4 text-white-50">
+    Loading alerts…
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="card">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Rule Type</th>
+            <th>Card Hash</th>
+            <th>Txn Count</th>
+            <th>Window</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alert of alerts">
+            <td>
+              <span class="badge bg-danger">
+                {{ alert.rule_type }}
+              </span>
+            </td>
+            <td class="text-sm">{{ alert.card_hash }}</td>
+            <td class="text-sm">{{ alert.transaction_count }}</td>
+            <td class="text-sm">{{ alert.window_bucket }}</td>
+            <td class="text-sm">{{ alert.last_updated | date:'short' }}</td>
+          </tr>
+
+          <tr *ngIf="alerts.length === 0">
+            <td colspan="5" class="text-center py-3 text-sm fg-text-muted">
+              No alerts found for the current filters
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+      <div class="text-xs fg-text-muted">
+        Showing {{ alerts.length }} of {{ total }}
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          [disabled]="page === 1"
+          (click)="changePage(page - 1)">
+          <i class="bi bi-chevron-left me-1"></i>
+          Prev
+        </button>
+
+        <span class="text-xs">Page {{ page }}</span>
+
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          [disabled]="alerts.length < limit"
+          (click)="changePage(page + 1)">
+          Next
+          <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

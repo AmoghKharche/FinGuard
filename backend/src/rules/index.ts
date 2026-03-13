@@ -3,10 +3,12 @@ import { FraudRule } from "./types";
 import { highAmountRule } from "./highAmount.rule";
 import { rapidFailureRule } from "./rapidFailure.rule";
 import { suspiciousHoursRule } from "./suspiciousHours.rule";
+import { merchantVelocityRule } from "./merchantVelocity.rule";
 
 export const fraudRules: FraudRule[] = [
   velocityRule,
   highAmountRule,
   rapidFailureRule,
   suspiciousHoursRule,
+  merchantVelocityRule,
 ];

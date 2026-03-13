@@ -1,21 +1,85 @@
-<div class="bg-dark text-white p-3 vh-100" style="width: 250px;">
-    <h5 class="mb-4">FinGuard</h5>
-  
-    <ul class="nav nav-pills flex-column">
+<aside class="fg-sidebar d-flex flex-column">
+
+  <!-- Brand -->
+  <div class="fg-sidebar-brand d-flex align-items-center mb-4">
+    <div class="fg-sidebar-logo me-2 d-flex align-items-center justify-content-center">
+      <i class="bi bi-shield-check"></i>
+    </div>
+    <div>
+      <div class="fg-sidebar-title">FinGuard</div>
+      <div class="fg-sidebar-subtitle text-xs">Fraud Risk Console</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fg-sidebar-nav flex-grow-1">
+    <ul class="nav flex-column gap-1">
       <li class="nav-item">
-        <a routerLink="/" class="nav-link text-white">Dashboard</a>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link fg-sidebar-link"
+        >
+          <i class="bi bi-speedometer2 me-2"></i>
+          <span>Overview</span>
+        </a>
       </li>
+
       <li class="nav-item">
-        <a routerLink="/transactions" class="nav-link text-white">Transactions</a>
+        <a
+          routerLink="/transactions"
+          routerLinkActive="active"
+          class="nav-link fg-sidebar-link"
+        >
+          <i class="bi bi-credit-card-2-front me-2"></i>
+          <span>Transactions</span>
+        </a>
       </li>
+
       <li class="nav-item">
-        <a routerLink="/fraud-alerts" class="nav-link text-white">Fraud Alerts</a>
+        <a
+          routerLink="/fraud-alerts"
+          routerLinkActive="active"
+          class="nav-link fg-sidebar-link"
+        >
+          <i class="bi bi-exclamation-octagon me-2"></i>
+          <span>Fraud Alerts</span>
+        </a>
       </li>
+
       <li class="nav-item">
-        <a routerLink="/rules" class="nav-link text-white">Rules</a>
+        <a
+          routerLink="/rules"
+          routerLinkActive="active"
+          class="nav-link fg-sidebar-link"
+        >
+          <i class="bi bi-sliders2-vertical me-2"></i>
+          <span>Rules</span>
+        </a>
       </li>
+
       <li class="nav-item">
-        <a routerLink="/dlq" class="nav-link text-white">DLQ</a>
+        <a
+          routerLink="/dlq"
+          routerLinkActive="active"
+          class="nav-link fg-sidebar-link"
+        >
+          <i class="bi bi-inboxes me-2"></i>
+          <span>DLQ</span>
+        </a>
       </li>
     </ul>
+  </nav>
+
+  <!-- Footer -->
+  <div class="fg-sidebar-footer mt-auto pt-3">
+    <div class="d-flex align-items-center justify-content-between text-xs">
+      <span class="text-white-50">Status</span>
+      <span class="badge bg-success-subtle text-success border border-success-subtle">
+        Healthy
+      </span>
+    </div>
   </div>
+
+</aside>

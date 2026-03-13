@@ -7,11 +7,19 @@ export const highAmountRule: FraudRule = {
 
   async evaluate(app, client, event) {
     const config = app.ruleConfig["HIGH_AMOUNT_V1"];
-const threshold = config.threshold!;
-const severity = config.severity;
 
-if (event.amount > threshold) {
+    if (!config) {
+      return {
+        ruleType: "HIGH_AMOUNT_V1",
+        triggered: false,
+        severity: 0,
+      };
+    }
 
+    const threshold = config.threshold!;
+    const severity = config.severity;
+
+    if (event.amount > threshold) {
       const windowBucket = Math.floor(Date.now() / 60000);
       const alertId = randomUUID();
 
@@ -29,7 +37,7 @@ if (event.amount > threshold) {
           alertId,
           event.cardHash,
           "HIGH_AMOUNT_V1",
-          windowBucket
+          windowBucket,
         ]
       );
 
@@ -38,16 +46,18 @@ if (event.amount > threshold) {
         "High amount rule triggered"
       );
       metrics.incrementFraud("HIGH_AMOUNT_V1");
+
       return {
         ruleType: "HIGH_AMOUNT_V1",
         triggered: true,
-        severity: severity
+        severity,
       };
     }
+
     return {
-        ruleType: "HIGH_AMOUNT_V1",
-        triggered: false,
-        severity: 0
-      };
-  }
+      ruleType: "HIGH_AMOUNT_V1",
+      triggered: false,
+      severity: 0,
+    };
+  },
 };

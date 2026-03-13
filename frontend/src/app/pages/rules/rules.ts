@@ -12,6 +12,8 @@ const RULE_DESCRIPTIONS: Record<string, string> = {
     'Flags a card when failed transaction attempts in the window reach the threshold. Used to detect testing or brute-force behavior.',
   SUSPICIOUS_HOURS_V1:
     'Flags any transaction that occurs between the configured start and end hour in Indian Standard Time (IST, 0–23). Use for high-risk windows (e.g. late night). Overnight ranges supported (e.g. 22 to 6).',
+    MERCHANT_VELOCITY_V1:
+    'Flags a merchant when the number of transactions in the time window exceeds the threshold. Useful for spotting compromised or abused merchants seeing sudden traffic spikes.',
 };
 
 @Component({
