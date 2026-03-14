@@ -139,11 +139,35 @@ The README explicitly calls this out so reviewers see that you understand both *
 
 ### Prerequisites
 
-- Node.js (LTS)
-- Redis
-- Postgres
+- **Node.js** (LTS)
+- **Docker & Docker Compose** (for Postgres and Redis), or install Redis and Postgres locally
 
-### Backend
+### 1. Environment variables
+
+From the repository root, copy the example env file and edit if needed:
+
+```bash
+cp .env.example .env
+```
+
+`.env` is used by **Docker Compose** (Postgres credentials) and by the **backend** (database URL, Redis). The defaults in `.env.example` work with the services started in the next step. For production, set strong values and never commit `.env`.
+
+### 2. Start infrastructure (Postgres + Redis)
+
+From the repository root:
+
+```bash
+docker compose up -d
+```
+
+This runs:
+
+- **Postgres 15** on `localhost:5432` (user and database from `POSTGRES_*` in `.env`)
+- **Redis 7** on `localhost:6379`
+
+Data is persisted in Docker volumes (`postgres_data`, `redis_data`).
+
+### 3. Backend
 
 From the repository root:
 
@@ -153,9 +177,9 @@ npm install
 npm run dev
 ```
 
-The Fastify server will start, connect to Redis and Postgres, and start the transaction worker.
+The backend reads `DATABASE_URL`, `REDIS_HOST`, and `REDIS_PORT` from the root `.env`. The Fastify server will start, connect to Redis and Postgres, and start the transaction worker.
 
-### Frontend
+### 4. Frontend
 
 ```bash
 cd frontend
@@ -163,6 +187,6 @@ npm install
 npm run dev   # or: ng serve, depending on your setup
 ```
 
-Then open `http://localhost:4200/` to view the dashboard.
+Then open **http://localhost:4200/** to view the dashboard.
 
 ---

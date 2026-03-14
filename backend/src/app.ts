@@ -1,4 +1,8 @@
+import path from "path";
 import dotenv from "dotenv";
+
+// Load root .env (when running from backend/) then backend/.env so one file works for Docker + backend
+dotenv.config({ path: path.resolve(process.cwd(), "..", ".env") });
 dotenv.config();
 import cors from '@fastify/cors';
 declare module "fastify" {
