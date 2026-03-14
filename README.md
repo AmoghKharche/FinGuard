@@ -166,18 +166,3 @@ npm run dev   # or: ng serve, depending on your setup
 Then open `http://localhost:4200/` to view the dashboard.
 
 ---
-
-## Demo script for interviews
-
-You can use this as a 3–5 minute walkthrough with a recruiter or senior engineer:
-
-- **1) Problem framing** – “Payments need to catch fraud in milliseconds while avoiding false positives. I built Finguard to explore that trade‑off with an event‑driven design and a set of fraud rules.”
-- **2) Architecture** – Show the diagram from this README and briefly explain Redis Streams, the worker, rules, Postgres, and the WebSocket metrics.
-- **3) Live demo** – Trigger a few test events:
-  - A normal small transaction that gets APPROVED.
-  - A high amount or high‑velocity sequence that hits REVIEW/DECLINED.
-  - Show the metrics and fraud alerts updating live.
-- **4) Comparison** – End with how this maps to real systems and what you would add next (feature store, ML model, more advanced rules) if you were building this for production.
-
-This combination of **working code, clear architecture, and narrative** is what makes the project stand out.
-
