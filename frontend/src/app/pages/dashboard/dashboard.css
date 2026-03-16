@@ -47,6 +47,14 @@
   width: 100%;
 }
 
+/* Ensure chart canvas never exceeds container height on first render */
+.fg-chart-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .fg-chart-pie {
   height: 80px;
 }
