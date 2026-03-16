@@ -3,6 +3,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api';
 import { ChartConfiguration } from 'chart.js';
+import { TransactionSimulatorModal } from '../../shared/transaction-simulator/transaction-simulator-modal';
 
 import {
   Chart,
@@ -43,7 +44,7 @@ const BAR_BORDER = ['#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#22c55e', '#06b
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective, TransactionSimulatorModal],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -131,7 +132,33 @@ export class Dashboard implements OnInit {
     }
   };
 
+  simulatorOpen = false;
+  simulatorRuleConfig: any = null;
+  simulatorLoading = false;
+
   constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+
+  openSimulator() {
+    if (this.simulatorLoading) {
+      return;
+    }
+    this.simulatorLoading = true;
+
+    this.api.getRuleConfig().subscribe({
+      next: (res) => {
+        this.simulatorRuleConfig = (res as any)?.data || res;
+        this.simulatorOpen = true;
+        this.simulatorLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.simulatorRuleConfig = null;
+        this.simulatorOpen = true;
+        this.simulatorLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadInitialMetrics();

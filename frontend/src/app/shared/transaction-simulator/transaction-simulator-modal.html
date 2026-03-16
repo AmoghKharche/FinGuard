@@ -1,0 +1,200 @@
+<div
+  class="fg-sim-modal-backdrop"
+  *ngIf="open"
+>
+  <div class="fg-sim-modal card">
+    <div class="fg-sim-modal-header d-flex justify-content-between align-items-start mb-2">
+      <div>
+        <h5 class="mb-1 d-flex align-items-center gap-2">
+          <i class="bi bi-magic"></i>
+          Simulate a transaction
+        </h5>
+        <p class="text-xs mb-0 text-muted">
+          Try common fraud and risk scenarios. We will post synthetic events through the normal pipeline,
+          and you can observe them in Transactions, Fraud Alerts, and Dashboard metrics.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="btn btn-link btn-sm text-muted p-0"
+        (click)="close()"
+        aria-label="Close"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="fg-sim-modal-body">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-xs text-uppercase text-muted">Scenarios</span>
+            <div class="btn-group btn-group-sm" role="group">
+              <button
+                type="button"
+                class="btn"
+                [ngClass]="mode === 'preset' ? 'btn-primary' : 'btn-outline-secondary'"
+                (click)="setMode('preset')"
+              >
+                Guided
+              </button>
+              <button
+                type="button"
+                class="btn"
+                [ngClass]="mode === 'advanced' ? 'btn-primary' : 'btn-outline-secondary'"
+                (click)="setMode('advanced')"
+              >
+                Advanced
+              </button>
+            </div>
+          </div>
+
+          <div class="fg-sim-scenarios-list">
+            <button
+              type="button"
+              class="fg-sim-scenario w-100 text-start"
+              *ngFor="let scenario of scenarios"
+              [ngClass]="{ 'fg-sim-scenario-active': scenario.id === selectedScenario?.id }"
+              (click)="selectScenario(scenario)"
+            >
+              <div class="d-flex align-items-start justify-content-between">
+                <div>
+                  <div class="fw-semibold text-sm">{{ scenario.name }}</div>
+                  <div class="text-xs text-muted mt-1">
+                    {{ scenario.description }}
+                  </div>
+                  <div
+                    class="text-xs text-muted mt-1"
+                    *ngIf="scenario.notes"
+                  >
+                    <span class="badge bg-light text-muted border me-1">Rule hint</span>
+                    {{ scenario.notes }}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+
+        </div>
+
+        <div class="col-md-7">
+          <span class="text-xs text-uppercase text-muted d-block mb-2">Transaction details</span>
+
+          <form (ngSubmit)="submit()">
+            <div class="mb-2">
+              <label class="form-label text-xs text-uppercase text-muted mb-1">Merchant ID</label>
+              <input
+                class="form-control form-control-sm"
+                [(ngModel)]="form.merchantId"
+                name="merchantId"
+                [readonly]="mode === 'preset'"
+              />
+            </div>
+
+            <div class="row g-2">
+              <div class="col-7">
+                <div class="mb-2">
+                  <label class="form-label text-xs text-uppercase text-muted mb-1">Transaction ID</label>
+                  <input
+                    class="form-control form-control-sm"
+                    [(ngModel)]="form.transactionId"
+                    name="transactionId"
+                    [readonly]="mode === 'preset'"
+                  />
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="mb-2">
+                  <label class="form-label text-xs text-uppercase text-muted mb-1">Amount</label>
+                  <input
+                    type="number"
+                    min="0"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="form.amount"
+                    name="amount"
+                    [readonly]="mode === 'preset'"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="mb-2">
+                  <label class="form-label text-xs text-uppercase text-muted mb-1">Status</label>
+                  <select
+                    class="form-select form-select-sm"
+                    [(ngModel)]="form.status"
+                    name="status"
+                    [disabled]="mode === 'preset'"
+                  >
+                    <option *ngFor="let s of statusOptions" [ngValue]="s">{{ s }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-2">
+                  <label class="form-label text-xs text-uppercase text-muted mb-1">Card hash</label>
+                  <input
+                    class="form-control form-control-sm"
+                    [(ngModel)]="form.cardHash"
+                    name="cardHash"
+                    [readonly]="mode === 'preset'"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label text-xs text-uppercase text-muted mb-1">
+                Timestamp (optional, ms since epoch)
+              </label>
+              <input
+                class="form-control form-control-sm"
+                [(ngModel)]="form.timestamp"
+                name="timestamp"
+                [readonly]="mode === 'preset'"
+                placeholder="Leave blank to use server time"
+              />
+            </div>
+
+            <div class="small text-muted mb-2">
+              Simulated events are processed by the same worker and fraud rules as normal traffic.
+              Some scenarios send multiple events and might take a few seconds to appear.
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-3">
+              <div class="text-xs text-muted" *ngIf="lastResultMessage">
+                {{ lastResultMessage }}
+              </div>
+              <div class="d-flex align-items-center gap-2 ms-auto">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="goToTransactions()"
+                >
+                  View in Transactions
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                  [disabled]="isPosting"
+                >
+                  <span
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                    *ngIf="isPosting"
+                  ></span>
+                  <span *ngIf="!isPosting">Post simulated transaction</span>
+                  <span *ngIf="isPosting">Posting...</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

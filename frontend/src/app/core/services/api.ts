@@ -34,4 +34,18 @@ export class ApiService {
   getDLQ(): Observable<any> {
     return this.http.get(`${this.baseUrl}/dlq`);
   }
+
+  simulateTransaction(body: {
+    merchantId: string;
+    transactionId: string;
+    amount: number;
+    status: 'APPROVED' | 'FAILED';
+    cardHash: string;
+    timestamp?: number | string;
+  }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/events`, {
+      ...body,
+      source: 'SIMULATOR'
+    });
+  }
 }

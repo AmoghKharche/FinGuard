@@ -113,6 +113,20 @@ This turns the backend into a **product**, not just a service.
 
 ---
 
+## Transaction simulator
+
+The dashboard includes a small **transaction simulator** so you can exercise the rule engine end‑to‑end without writing a client.
+
+- **Open the simulator** from the Dashboard header button: **“Simulate a transaction”**.
+- Choose from a set of **guided scenarios** (e.g. high amount, rapid failures, night‑time suspicious, merchant velocity spike) or switch to **Advanced** mode to edit fields.
+- The simulator sends events to the existing `POST /events` API using the same shape as real traffic and marks them with `source = "SIMULATOR"` for future filtering.
+- As events are processed by the worker, you can:
+  - See decisions on the **Transactions** page.
+  - Watch rule activity on the **Fraud Alerts** page.
+  - Observe live counters and charts on the **Dashboard**.
+
+---
+
 ## How this compares to big‑company fraud engines
 
 This project deliberately implements a **subset** of what large players use:

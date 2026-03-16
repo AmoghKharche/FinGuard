@@ -9,6 +9,24 @@
         <div class="fg-page-subtitle">Decisions, fraud alerts and reliability in real time</div>
       </div>
     </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button
+        type="button"
+        class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+        (click)="openSimulator()"
+        [disabled]="simulatorLoading"
+      >
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+          *ngIf="simulatorLoading"
+        ></span>
+        <i class="bi bi-magic" *ngIf="!simulatorLoading"></i>
+        <span>{{ simulatorLoading ? 'Loading rules…' : 'Simulate a transaction' }}</span>
+      </button>
+    </div>
   </div>
 
   <!-- Summary Cards -->
@@ -107,4 +125,9 @@
       </div>
     </div>
   </div>
+
+  <app-transaction-simulator-modal
+    [(open)]="simulatorOpen"
+    [ruleConfig]="simulatorRuleConfig"
+  ></app-transaction-simulator-modal>
 </div>

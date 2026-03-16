@@ -29,7 +29,9 @@ const eventsRoute: FastifyPluginAsync = async (fastify) => {
       "cardHash",
       body.cardHash,
       "timestamp",
-      String(timestamp)
+      String(timestamp),
+      "source",
+      body.source ?? "CLIENT"
     );
     fastify.log.debug(
       { eventId, transactionId: body.transactionId },
