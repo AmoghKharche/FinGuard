@@ -1,5 +1,12 @@
 import { FastifyInstance } from "fastify";
 
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+function toIstIso(date: Date): string {
+  const ist = new Date(date.getTime() + IST_OFFSET_MS);
+  return ist.toISOString();
+}
+
 export default async function fraudAlertsRoute(app: FastifyInstance) {
 
   app.get("/fraud-alerts", async (request, reply) => {
@@ -48,12 +55,17 @@ export default async function fraudAlertsRoute(app: FastifyInstance) {
 
     const dataResult = await app.pg.query(baseQuery, values);
 
+    const rows = dataResult.rows.map(row => ({
+      ...row,
+      last_updated_ist: row.last_updated ? toIstIso(new Date(row.last_updated)) : null
+    }));
+
     const countResult = await app.pg.query(
       `SELECT COUNT(*) FROM fraud_alerts`
     );
 
     return {
-      data: dataResult.rows,
+      data: rows,
       page,
       limit,
       total: Number(countResult.rows[0].count)

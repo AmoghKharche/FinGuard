@@ -1,6 +1,12 @@
 import { FastifyInstance } from "fastify";
 
 const DLQ_STREAM = "transactions_dlq";
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+function toIstIso(date: Date): string {
+  const ist = new Date(date.getTime() + IST_OFFSET_MS);
+  return ist.toISOString();
+}
 
 export default async function dlqRoute(app: FastifyInstance) {
 
@@ -23,12 +29,19 @@ export default async function dlqRoute(app: FastifyInstance) {
         obj[fields[i]] = fields[i + 1];
       }
 
-      let parsedPayload = null;
+      let parsedPayload: any = null;
 
       try {
         parsedPayload = JSON.parse(obj.payload);
       } catch (e) {
         parsedPayload = obj.payload;
+      }
+
+      if (parsedPayload && typeof parsedPayload.failedAt === "string") {
+        const d = new Date(parsedPayload.failedAt);
+        if (!isNaN(d.getTime())) {
+          parsedPayload.failedAtIst = toIstIso(d);
+        }
       }
 
       return {
