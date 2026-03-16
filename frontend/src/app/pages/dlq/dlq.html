@@ -40,7 +40,7 @@
             <td class="text-sm">{{ item.originalEvent?.transactionId }}</td>
             <td class="text-sm text-danger">{{ item.errorMessage }}</td>
             <td class="text-sm">{{ item.retryCount }}</td>
-            <td class="text-sm">{{ item.failedAt | date:'short' }}</td>
+            <td class="text-sm">{{ item.failedAtIst | date:'short' }}</td>
             <td>
               <button class="btn btn-sm btn-outline-secondary"
                       (click)="toggleExpand(item)">

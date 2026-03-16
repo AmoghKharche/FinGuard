@@ -45,7 +45,6 @@ export default async function transactionsRoute(app: FastifyInstance) {
       `SELECT COUNT(*) FROM transaction_decisions`
     );
 
-    console.log(rows)
     return {
       data: rows,
       page,

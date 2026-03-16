@@ -74,7 +74,7 @@
             <td class="text-sm">{{ alert.card_hash }}</td>
             <td class="text-sm">{{ alert.transaction_count }}</td>
             <td class="text-sm">{{ alert.window_bucket }}</td>
-            <td class="text-sm">{{ alert.last_updated | date:'short' }}</td>
+            <td class="text-sm">{{ alert.last_updated_ist | date:'short' }}</td>
           </tr>
 
           <tr *ngIf="alerts.length === 0">
