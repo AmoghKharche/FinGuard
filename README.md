@@ -58,7 +58,7 @@ flowchart LR
 - When a rule fires, it also records or updates an entry in `fraud_alerts`, so the UI can show **which patterns are being detected**.
 - The worker maintains **counters and metrics** and pushes WebSocket updates to the dashboard so you can see changes live.
 
-Rule configuration (thresholds, time windows, severities) is stored in a `rule_config` table. The Fastify app listens to a Postgres notification channel and **hot‑reloads rule config** without a deploy.
+Rule configuration (thresholds, time windows, severities) is stored in a `rule_config` table. The Fastify app listens on Postgres channel `rule_config_updated` and **hot‑reloads rule config** when a notification arrives—typically you add a DB trigger (or emit `NOTIFY` from your update path) after changes. The repo wires the listener but does **not** ship SQL migrations; the Rules UI updates the table via `PATCH` and may need that trigger (or a process restart) for the worker to pick up edits immediately.
 
 ---
 
@@ -117,7 +117,7 @@ This turns the backend into a **product**, not just a service.
 
 The dashboard includes a small **transaction simulator** so you can exercise the rule engine end‑to‑end without writing a client.
 
-- **Open the simulator** from the Dashboard header button: **“Simulate a transaction”**.
+- **Open the simulator** from the **Dashboard** page (top toolbar): **“Simulate a transaction”**.
 - Choose from a set of **guided scenarios** (e.g. high amount, rapid failures, night‑time suspicious, merchant velocity spike) or switch to **Advanced** mode to edit fields.
 - The simulator sends events to the existing `POST /events` API using the same shape as real traffic and marks them with `source = "SIMULATOR"` for future filtering.
 - As events are processed by the worker, you can:
@@ -176,7 +176,7 @@ docker compose up -d
 
 This runs:
 
-- **Postgres 15** on `localhost:5432` (user and database from `POSTGRES_*` in `.env`)
+- **Postgres 15** on `localhost:5433` (mapped from container port 5432; avoids conflict with a local Postgres on 5432)
 - **Redis 7** on `localhost:6379`
 
 Data is persisted in Docker volumes (`postgres_data`, `redis_data`).
@@ -198,7 +198,7 @@ The backend reads `DATABASE_URL`, `REDIS_HOST`, and `REDIS_PORT` from the root `
 ```bash
 cd frontend
 npm install
-npm run dev   # or: ng serve, depending on your setup
+npm start   # runs `ng serve` (Angular dev server)
 ```
 
 Then open **http://localhost:4200/** to view the dashboard.
